@@ -2,7 +2,7 @@
 
 version="1.1"
 date="2023-10-17"
-title="SSH TUI Panel v$version"
+title="SSH Control v$version"
 
 linux_dist() {
     if [ -x "$(command -v yum)" ]; then
@@ -241,7 +241,7 @@ while true; do
 
         "U") # Update Panel
             current_sha=$(cat version.info)
-            latest_sha=$(curl -s "https://api.github.com/repos/vfarid/ssh-panel/commits/main" | jq -r .sha)
+            latest_sha=$(curl -s "https://api.github.com/repos/me1986/ssh-panel/commits/main" | jq -r .sha)
 
             if [ "$current_sha" = "$latest_sha" ]; then
                 dialog --clear --backtitle "$title" --title "Up to Date" --msgbox "\nYou already have the latest version." 10 60
@@ -251,7 +251,7 @@ while true; do
                 if [ "$prompt" = "UPDATE" ]; then
                     cd ..
                     clear
-                    wget -O ssh-panel-install.sh https://raw.githubusercontent.com/vfarid/ssh-panel/main/install.sh
+                    wget -O ssh-panel-install.sh https://raw.githubusercontent.com/me1986/ssh-panel/main/install.sh
                     sudo rm -rf ssh-panel/* 
                     sudo sh ssh-panel-install.sh
                     sudo rm -f ssh-panel-install.sh
@@ -268,7 +268,7 @@ while true; do
         "A") # About
             dialog --clear --backtitle "$title" \
             --title "About" \
-            --msgbox "\n$title \n\nLicenced under GPLv3\nby Vahid Farid\n\nRepo: github.com/vfarid/ssh-panel\nTwitter: @vahidfarid" 15 60
+            --msgbox "\n$title \n\nLicenced under GPLv3" 15 60
             ;;
 
         "Q") # Quit
