@@ -6,7 +6,7 @@ title="SSH TUI Panel v$version"
 
 install_panel() {
     sudo rm -f ssh-panel.zip
-    wget -O ssh-panel.zip https://github.com/vfarid/ssh-panel/archive/main.zip
+    wget -O ssh-panel.zip https://github.com/me1986/ssh-panel/archive/main.zip
     unzip ssh-panel.zip
     if [ ! -d "ssh-panel" ]; then
         sudo mkdir ssh-panel
@@ -16,7 +16,7 @@ install_panel() {
     sudo rm -rf ssh-panel-main
     sudo rm -f ssh-panel.zip
     cd ssh-panel/
-    curl -s "https://api.github.com/repos/vfarid/ssh-panel/commits/main" | jq -r .sha > version.info
+    curl -s "https://api.github.com/repos/me1986/ssh-panel/commits/main" | jq -r .sha > version.info
     sudo mkdir -p /var/log/ssh-panel
     sudo chmod +x cron.sh panel.sh
     wget -O hogs.go https://raw.githubusercontent.com/boopathi/nethogs-parser/master/hogs.go
