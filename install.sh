@@ -34,7 +34,7 @@ install_panel() {
 
 remove_panel() {
     sudo rm -rf ssh-panel
-    cron_job="*/5 * * * * sh $(pwd)/ssh-panel/cron.sh"
+    cron_job="*/1 * * * * sh $(pwd)/ssh-panel/cron.sh"
     if crontab -l 2>/dev/null | grep -Fq "$cron_job"; then
         current_crontab=$(crontab -l 2>/dev/null)
         new_crontab=$(echo "$current_crontab" | grep -Fv "$cron_job")
