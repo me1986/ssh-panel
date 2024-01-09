@@ -1,8 +1,8 @@
 #!/bin/bash
 
-version="1.1"
-date="2023-10-17"
-title="SSH Control v$version"
+version="2.9"
+date="2025-10-17"
+title="SSH Panel v$version"
 
 linux_dist() {
     if [ -x "$(command -v yum)" ]; then
@@ -105,7 +105,8 @@ manage_users() {
                 confirmed_username=$(dialog --clear --backtitle "$title" --title "Delete User" \
                 --inputbox "Enter \`$username\` to confirm:" 10 60 2>&1 >/dev/tty)
 
-                if [ "$username" = "$confirmed_username" ]; then
+                if [ "$username" = "$confirmed_username" || "d"= "$confirmed_username" ]; then
+                    sudo killall -u "$username"
                     sudo userdel -r "$username"
                     dialog --clear --backtitle "$title" --title "Deleted" --msgbox "\nUser `$username` deleted successfully." 10 60
                 else
@@ -117,7 +118,12 @@ manage_users() {
 }
 
 user_stats() {
-    ./hogs -type=csv /var/log/ssh-panel/* > hogs.csv
+    directory="/var/log/ssh-panel/users"
+    
+    if [ ! -d "$directory" ]; then
+        mkdir -p "$directory"
+    fi
+    # ./hogs -type=csv /var/log/ssh-panel/* > hogs.csv
     local i=1
     if [ -n "$1" ]; then
         users="$1"
@@ -127,22 +133,37 @@ user_stats() {
 
     clear
     printf " |-------|-------------------------------------|--------------|--------------|\n"
-    printf " |   #   |               Username              |  Upload(MB)  | Download(MB) |\n"
+    printf " |   #   |               Username              |  Upload(KB)  | Download(KB) |\n"
     printf " |-------|-------------------------------------|--------------|--------------|\n"
-    for user in $users; do
+    for user in $users; do   
         user_upload=0
         user_download=0
-        rm -f temp.csv
-        cat hogs.csv | grep ",$user," > temp.csv
-        while IFS=, read -r tmp upload download username path machine; do
-            # date=$(echo "$path" | awk -F/ '{print $NF}' | awk -F. '{print $1}' | cut -d "-" -f "1-3")
-            if [ -n "$upload" ]; then
-                user_upload=$(echo "$user_upload + ($upload / 1024)" | bc)
-            fi
-            if [ -n "$download" ]; then
-                user_download=$(echo "$user_download + ($download / 1024)" | bc)
-            fi
-        done < temp.csv
+        if test -f /var/log/ssh-panel/users/$user.csv; then
+            while IFS="," read -r col1 col2 col3
+                do
+                    if [ "$col2" != 0 ]; then
+                       # echo "$col2" 
+                        user_upload=$(echo "($col2)"| bc)
+                    fi
+                    if [ "$col3" != 0 ]; then
+                       # echo "$col3" 
+                        user_download=$(echo "($col3)"| bc)
+                    fi                   
+                done < /var/log/ssh-panel/users/"$user".csv
+            # rm -f /var/log/ssh-panel/users/"$user".csv
+        fi
+
+        # rm -f temp.csv
+        # cat hogs.csv | grep ",$user," > temp.csv
+        # while IFS=, read -r tmp upload download username path machine; do
+        #     # date=$(echo "$path" | awk -F/ '{print $NF}' | awk -F. '{print $1}' | cut -d "-" -f "1-3")
+        #     if [ -n "$upload" ]; then
+        #         user_upload=$(echo "$user_upload + $upload" | bc)
+        #     fi
+        #     if [ -n "$download" ]; then
+        #         user_download=$(echo "$user_download + $download" | bc)
+        #     fi
+        # done < temp.csv
 
         local text
         if is_suspended "$user"; then
@@ -153,11 +174,18 @@ user_stats() {
 
         user_upload_formatted=$(echo $user_upload | numfmt --grouping)
         user_download_formatted=$(echo $user_download | numfmt --grouping)
+        # sqlite3 dbtest.db <<'END_SQL'
+        #     CREATE TABLE IF NOT EXISTS user1(name text, upload int, dowload int);
+        #     insert into tbl1 values('"$text"', "$user_upload_formatted","$user_download_formatted");
+        #     select * from user1
+        #     END_SQL
+        # echo "$user,$user_upload,$user_download" >> /var/log/ssh-panel/users/"$user".csv  
 
         printf " | %4d  |  %-34s |  %10s  |  %10s  |\n" $i "$text" "$user_upload_formatted" "$user_download_formatted"
         i=$((i + 1))
     done
-    rm -f temp.csv hogs.csv
+    # rm -f /var/log/ssh-panel/*.log
+    # rm -f temp.csv hogs.csv
     printf " |-------|-------------------------------------|--------------|--------------|\n\n"
     echo "Press Enter to continue..."
     dd bs=1 count=1 2>/dev/null
@@ -191,7 +219,7 @@ while true; do
                     prompt=$(dialog --clear --backtitle "$title" --title "Clear Statistics" \
                         --inputbox "Enter \`CLEAR\` to confirm:" 10 60 2>&1 >/dev/tty)
                     if [ "$prompt" = "CLEAR" ]; then
-                        sudo rm -rf /var/log/ssh-panel/*
+                        sudo rm -rf /var/log/ssh-panel/*.log
                         dialog --clear --backtitle "$title" --title "Success" --msgbox "\nStatistics cleared successfully." 10 60
                     else
                         dialog --clear --backtitle "$title" --title "Cancel" --msgbox "\nOperation canceled!" 10 60
@@ -268,7 +296,7 @@ while true; do
         "A") # About
             dialog --clear --backtitle "$title" \
             --title "About" \
-            --msgbox "\n$title \n\nLicenced under GPLv3" 15 60
+            --msgbox "\n$title \n\nBy Hamid Test Version" 15 60
             ;;
 
         "Q") # Quit
@@ -277,3 +305,4 @@ while true; do
             ;;
     esac
 done
+
