@@ -22,7 +22,7 @@ install_panel() {
     wget -O hogs.go https://raw.githubusercontent.com/boopathi/nethogs-parser/master/hogs.go
     sudo go build -o hogs hogs.go
     sudo rm -f hogs.go
-    cron_job="*/5 * * * * sh $(pwd)/cron.sh"
+    cron_job="*/1 * * * * sh $(pwd)/cron.sh"
     if ! crontab -l 2>/dev/null | grep -Fq "$cron_job"; then
         (crontab -l ; echo "$cron_job") | crontab
     fi
