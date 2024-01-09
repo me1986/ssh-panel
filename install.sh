@@ -6,7 +6,7 @@ title="SSH TUI Panel v$version"
 
 install_panel() {
     sudo rm -f ssh-panel.zip
-    wget -O ssh-panel.zip https://github.com/me1986/ssh-panel/raw/main/ssh-panel.zip
+    wget -O ssh-panel.zip https://github.com/me1986/ssh-panel/archive/main.zip
     unzip ssh-panel.zip
     if [ ! -d "ssh-panel" ]; then
         sudo mkdir ssh-panel
